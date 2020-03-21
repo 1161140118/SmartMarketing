@@ -20,43 +20,51 @@ object MallCellMatch {
     val mall_cell =  ssc.sql(
       s"""
          |select
-         |  baseid, lng, lat, store, area, round(sqrt(dis2)*1000, 2) as dis
+         |  baseid, m.lng as lng, m.lat as lat, store, area, dis
          |from
-         |-- 为每个商场匹配最近的不超过30个基站
-         |-- 双向选择避免同一个基站匹配多个mall
          |(
          |  select
-         |    baseid, lng, lat, store, area, dis2,
-         |    row_number() over(partition by store, area order by dis2) as rankid
+         |    lng, lat, store, area, round(sqrt(dis2)*1000, 2) as dis
          |  from
-         |  -- 为每个基站匹配最近的mall
+         |  -- 为每个商场匹配最近的不超过30个基站
+         |  -- 双向选择避免同一个基站匹配多个mall
          |  (
          |    select
-         |      *,
-         |      row_number() over(partition by baseid, lng, lat, store, area order by dis2) as rankid
+         |      lng, lat, store, area, dis2,
+         |      row_number() over(partition by store, area order by dis2) as rankid
          |    from
-         |    -- 过滤距离
+         |    -- 为每个基站匹配最近的mall
          |    (
          |      select
-         |        baseid, b.lng as lng, b.lat as lat, store, area,
-         |        pow( (a.lng-b.lng)*77.521, 2) + pow( (a.lat-b.lat)*111.195, 2) as dis2
+         |        *,
+         |        row_number() over(partition by lng, lat order by dis2) as rankid
          |      from
+         |      -- 过滤距离
          |      (
-         |        select store, lng, lat, area
-         |        from suyanli.localname_main_mall
-         |      ) a
-         |      join
-         |      (
-         |        select baseid, lng, lat
-         |        from suyanli.dm_cell_info
-         |        where city='2301'
-         |      ) b
-         |    ) t1 -- 基本信息宽表
-         |    where dis2 < 0.01
-         |  ) t2
-         |  where rankid = 1
-         |) t3
-         |where rankid <= 30
+         |        select
+         |          b.lng as lng, b.lat as lat, store, area,
+         |          pow( (a.lng-b.lng)*77.521, 2) + pow( (a.lat-b.lat)*111.195, 2) as dis2
+         |        from
+         |        (
+         |          select store, lng, lat, area
+         |          from suyanli.localname_main_mall
+         |        ) a
+         |        join
+         |        (
+         |          select lng, lat
+         |          from suyanli.dm_cell_info
+         |          where city='2301'
+         |        ) b
+         |      ) t1 -- 基本信息宽表
+         |      where dis2 < 0.01
+         |    ) t2
+         |    where rankid = 1
+         |  ) t3
+         |  where rankid <= 30
+         |) m
+         |join
+         |( select baseid, lng, lat from suyanli.dm_cell_info where city='2301' ) c
+         |on m.lng = c.lng and m.lat = c.lat
        """.stripMargin)
 
     mall_cell.write.saveAsTable("suyanli.mall_cell_match")
