@@ -8,7 +8,7 @@ import org.apache.spark.sql.hive.HiveContext
   * 2. 计算用户访问浏览信息
   *    5. 对每个用户聚集，标定当天浏览商场列表，count，平均持续时间， 加和持续时间
   */
-object TargetMallStat {
+object TargetVisitStat {
 
   def main(args: Array[String]): Unit = {
     val start = args(0)
