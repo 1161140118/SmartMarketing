@@ -10,7 +10,7 @@ import utils.DateUtils
   * 根据规则，提取 mall_user_trace_stat 中 user，去除商场员工等特殊人群，剩余重点客户为vip，
   * 按周统计该周内总访问时间，访问次数写入表 mall_vip_info_week
   */
-object VipInfoWeek {
+object VipInfoWeekly {
 
   def main(args: Array[String]): Unit = {
 

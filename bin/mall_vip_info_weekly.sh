@@ -5,7 +5,7 @@
 # $3 : mall name / default: 'outlets'
 
 spark-submit \
---class smk.vip.VipInfoWeek \
+--class smk.vip.VipInfoWeekly \
 --queue suyan \
 --master yarn ~/chenzhihao/smartmarketing.jar "$1" "$2" "$3" \
 --deploy-mode cluster
