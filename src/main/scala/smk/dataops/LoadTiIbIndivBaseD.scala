@@ -21,17 +21,22 @@ object LoadTiIbIndivBaseD {
                     age:Int
                   )
 
+
   def main(args: Array[String]): Unit = {
     val date = if( args(0)=="all") "*" else args(0)
     val t1 = System.currentTimeMillis()
     println(s"get args: $date.")
 
-
-    val sc = SparkContext.getOrCreate(new SparkConf().setAppName(getClass.getName.init))
+    val conf = new SparkConf()
+      .set("spark.executor.instances","4")
+      .set("spark.executor.cores","2")
+      .set("spark.executor.memory","16G")
+    val sc = SparkContext.getOrCreate(conf)
     val ssc: SQLContext = new HiveContext(sc) // 同 spark-shell 中的 sqlContext
     import ssc.implicits._
     ssc.sql("set hive.exec.dynamic.partition=true;")
     ssc.sql("set hive.exec.dynamic.partition.mode=nonstrict")
+    sc.getConf.getAll.filter( _._1.contains("executor")).foreach(println) // print executor conf
 
     sc.textFile(s"hdfs:///suyan/ti_ib_indiv_base_d_$date.txt")
       .map( r => {

@@ -30,12 +30,16 @@ object LoadTiUbGsmBsD {
     val t1 = System.currentTimeMillis()
     println(s"get args: $date.")
 
-
-    val sc = SparkContext.getOrCreate(new SparkConf().setAppName(getClass.getName.init))
+    val conf = new SparkConf()
+      .set("spark.executor.instances","2")
+      .set("spark.executor.memory","4G")
+    val sc = SparkContext.getOrCreate(conf)
     val ssc: SQLContext = new HiveContext(sc) // 同 spark-shell 中的 sqlContext
     import ssc.implicits._
     ssc.sql("set hive.exec.dynamic.partition=true;")
     ssc.sql("set hive.exec.dynamic.partition.mode=nonstrict")
+    sc.getConf.getAll.filter( _._1.contains("executor")).foreach(println) // print executor conf
+
 
     sc.textFile(s"hdfs:///suyan/ti_ub_gsm_bs_d_$date.txt")
       .map( _.split("\\|",16) )
