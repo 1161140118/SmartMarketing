@@ -48,10 +48,8 @@ object TargetVisitDaily {
 
     df.write.mode("overwrite").format("parquet").partitionBy("part_date").insertInto("suyanli.mall_target_visit_daily")
 
-
-    sc.getConf.get("spark.executor.number")
-    sc.getConf.get("spark.executor.instances")
-
+    sc.stop()
+    println(s"Complete with ${(System.currentTimeMillis() - t1)/60000} min.")
 
   }
 
