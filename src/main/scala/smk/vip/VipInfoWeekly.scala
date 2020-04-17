@@ -22,7 +22,7 @@ object VipInfoWeekly {
     val mallIndex = 2 // index of param 'mall'
     val mall = if (args.length<= mallIndex || args(mallIndex).isEmpty ) "outlets" else args(mallIndex) // default : outlets
 
-    val dateThreshold = if ( args(1)=="-" ) 4 else Math.max( DateUtils.dateDiff(start,end)/2 , 1)
+    val dateThreshold = if ( args(1)=="-" ) 4 else Math.max( DateUtils.dateDiff(start,end)/2 +1 , 1)
     println(s"get args: $start, $end, $mall. date thr: $dateThreshold.")
 
     val sc = SparkContext.getOrCreate(new SparkConf().setAppName( getClass.getName.init ))
@@ -38,7 +38,7 @@ object VipInfoWeekly {
       *    2. 持续超过10小时剔除
       *    3. 平均连接时间为0min(<60s)
       *    4. 基站连接个数为1
-      * 2. 根据日期上下文，一周内连续4天( 即最多不超过 间隔天数/2 ）以上出现者，为商场员工或附近居民
+      * 2. 根据日期上下文，一周内4天( 即最多不超过 间隔天数/2 ）以上出现者，为商场员工或附近居民
       * 3. 以当天持续时间长短作为衡量用户重要性依据之一
       * 4. 考虑到疫情影响 1.1-1.7, 1.8-1.14, 1.15-1.22 作为三个研究周期
       *
