@@ -120,28 +120,10 @@ object DateUtils {
 
 
   def main(args: Array[String]): Unit = {
-//    println(getChinaWeekDay(str2Date("2019-08-18"), Calendar.SUNDAY))
-//    println(getChinaWeekDay(str2Date("2019-08-18"), Calendar.MONDAY))
-//    println(dateAddAndFormat("20200101",6))
     println(dateDiff("20200101","20200107"))
     val start = "20200101"
     val end = "20200107"
     println(DateUtils.dateDiff(start,end)/2 + 1)
-
-//    val dateFormat = "yyyyMMdd"
-//    val start = "20200101"
-//    val end = "20200107"
-//    val startDate = Calendar.getInstance()
-//    val endDate = Calendar.getInstance()
-//    startDate.setTime(new SimpleDateFormat(dateFormat).parse(start))
-//    endDate.setTime(new SimpleDateFormat(dateFormat).parse(end))
-//    println(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH)+1, startDate.get(Calendar.DAY_OF_MONTH))
-//    println(endDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH)+1, startDate.get(Calendar.DAY_OF_MONTH))
-//    val diff = ChronoUnit.DAYS.between(
-//      LocalDate.of(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH)+1, startDate.get(Calendar.DAY_OF_MONTH)),
-//      LocalDate.of(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH)+1, endDate.get(Calendar.DAY_OF_MONTH))
-//    ).toInt
-//    println(diff)
   }
 
 }
