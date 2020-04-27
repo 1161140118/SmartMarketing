@@ -97,6 +97,7 @@ object SocialGsmStatM {
          |      sum(roam_call_cnt) as roam_call_cnt
          |    from suyanli.ti_ub_gsm_bs_m
          |    where part_month = '$month'
+         |      and serv_no between '1' and '2'
          |      and home_region_code=='451'
          |    group by serv_no
          |  ) t
@@ -117,15 +118,19 @@ object SocialGsmStatM {
       "part_valid",
       when(
         // calling_avg_ln
-        $"calling_avg_ln".isNotNull
-          .and($"calling_avg_ln" > mean.getString(1).toDouble+ 3*stddev.getString(1).toDouble)
-          .and($"calling_cnt_ln" > mean.getString(4).toDouble + stddev.getString(4).toDouble)
+        ( $"calling_avg_ln".isNotNull
+          && $"calling_avg_ln" > mean.getString(1).toDouble+ 3*stddev.getString(1).toDouble
+          && $"calling_cnt_ln" > mean.getString(4).toDouble + stddev.getString(4).toDouble
+          )
           // called_avg_ln
-          .or(        $"called_avg_ln".isNotNull
-            .and($"called_avg_ln" > mean.getString(2).toDouble+ 3*stddev.getString(2).toDouble)
-            .and($"called_cnt_ln" > mean.getString(5).toDouble + stddev.getString(5).toDouble))
+          .or(  $"called_avg_ln".isNotNull
+            && $"called_avg_ln" > mean.getString(2).toDouble+ 3*stddev.getString(2).toDouble
+            && $"called_cnt_ln" > mean.getString(5).toDouble + stddev.getString(5).toDouble
+          )
           // calling_univ_ln
-          .or($"calling_univ_ln" < mean.getString(3).toDouble - 3*stddev.getString(3).toDouble)
+          .or(  $"calling_univ_ln".isNotNull
+            && $"calling_univ_ln" < mean.getString(3).toDouble - 3*stddev.getString(3).toDouble
+          )
           .or( $"calling_cnt_ln" > mean.getString(4).toDouble+ 3*stddev.getString(4).toDouble )
           .or( $"called_cnt_ln" > mean.getString(5).toDouble+ 3*stddev.getString(5).toDouble )
           .or( $"one_min_calling_cnt_ln" > mean.getString(6).toDouble+ 3*stddev.getString(6).toDouble)
