@@ -10,7 +10,7 @@ import utils.DateUtils
   * 根据规则，提取 mall_user_trace_stat 中 user，去除商场员工等特殊人群，剩余重点客户为vip，
   * 按周统计该周内总访问时间，访问次数写入表 mall_vip_info_week
   */
-object VipInfoWeekly {
+object VipInfoW {
 
   def main(args: Array[String]): Unit = {
 
@@ -68,7 +68,7 @@ object VipInfoWeekly {
          |  where length(userid) = 11
          |    and enter between '09' and '22'
          |    and leave between '09' and '22'
-         |    and dura < 600
+         |    and dura between 20 and 600
          |    and dura_avg > 0
          |    and base_uniq_cnt > 1
          |    and part_mall = '$mall'
