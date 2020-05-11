@@ -11,8 +11,8 @@ end=`date -d "1 day ${end_date}" +%Y%m%d`	# 日期自增
 while [ "${start}" != "${end}" ]
 do
   echo $start
-  echo -e "sh ~/chenzhihao/load_ti_ub_gsm_bs_d.sh $start "
+  echo -e "sh ~/chenzhihao/load_s1mm_trace_d.sh $start "
   pwd
-  sh ~/chenzhihao/load_ti_ub_gsm_bs_d.sh $start
+  sh ~/chenzhihao/load_s1mm_trace_d.sh $start
   start=`date -d "1 day ${start}" +%Y%m%d`	# 日期自增
 done
