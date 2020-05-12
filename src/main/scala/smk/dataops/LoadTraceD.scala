@@ -24,9 +24,9 @@ object LoadTraceD {
     println(s"get args: $date.")
 
     val conf = new SparkConf()
-      .set("spark.executor.instances", "8")
+      .set("spark.executor.instances", "6")
       .set("spark.executor.cores", "1")
-      .set("spark.executor.memory", "32G")
+      .set("spark.executor.memory", "8G")
     val sc = SparkContext.getOrCreate(conf)
     val ssc: SQLContext = new HiveContext(sc) // 同 spark-shell 中的 sqlContext
     import ssc.implicits._
