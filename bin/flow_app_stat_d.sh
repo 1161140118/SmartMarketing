@@ -6,5 +6,5 @@ spark-submit \
 --name "flow_app_stat_d_${1}" \
 --class smk.flow.FlowAppStatD \
 --queue suyan \
---master yarn ~/chenzhihao/smartmarketing.jar "$1" \
+--master yarn ~/chenzhihao/smartmarketing.jar "$1" "$2" \
 --deploy-mode cluster
