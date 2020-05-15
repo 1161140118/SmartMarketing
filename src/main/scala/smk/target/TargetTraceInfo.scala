@@ -20,8 +20,11 @@ object TargetTraceInfo {
     val t1 = System.currentTimeMillis()
     println(s"get args: $start, $end.")
 
-
-    val sc = SparkContext.getOrCreate(new SparkConf().setAppName(getClass.getName.init))
+    val conf = new SparkConf()
+      .set("spark.executor.instances","8")
+      .set("spark.executor.cores","2")
+      .set("spark.executor.memory","8G")
+    val sc = SparkContext.getOrCreate(conf)
     val ssc: SQLContext = new HiveContext(sc) // 同 spark-shell 中的 sqlContext
     import ssc.implicits._
     ssc.sql("set hive.exec.dynamic.partition=true;")
@@ -46,7 +49,7 @@ object TargetTraceInfo {
          |    and length(userid)=11
          |    and from_unixtime(startt / 1000, 'HH') between '09' and '21' -- 取小时，限制到21
          |    and from_unixtime(endt / 1000, 'HH')   between '09' and '21'
-         |    and (endt - startt)/1000 between 30 and 3600
+         |    and (endt - startt)/1000 between 30 and 7200  --  时间跨度限制在半分钟到2小时
          |) a
          |join
          |( select baseid, store, area from suyanli.mall_cell_match ) b

@@ -33,7 +33,11 @@ object TargetTraceStat {
     println(s"get args: $start, $end.")
 
 
-    val sc = SparkContext.getOrCreate(new SparkConf().setAppName(getClass.getName.init))
+    val conf = new SparkConf()
+      .set("spark.executor.instances","2")
+      .set("spark.executor.cores","1")
+      .set("spark.executor.memory","8G")
+    val sc = SparkContext.getOrCreate(conf)
     val ssc: SQLContext = new HiveContext(sc) // 同 spark-shell 中的 sqlContext
     import ssc.implicits._
     ssc.sql("set hive.exec.dynamic.partition=true;")
