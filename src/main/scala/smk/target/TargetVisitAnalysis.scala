@@ -13,10 +13,6 @@ import utils.DateUtils
   */
 object TargetVisitAnalysis {
 
-  object Util extends Serializable{
-
-  }
-
   def main(args: Array[String]): Unit = {
     // args0
     val start = args(0)

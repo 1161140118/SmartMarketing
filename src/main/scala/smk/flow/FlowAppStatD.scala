@@ -15,8 +15,8 @@ object FlowAppStatD {
 
     val conf = new SparkConf()
       .set("spark.executor.instances","8")
-      .set("spark.executor.cores","1")
-      .set("spark.executor.memory","32G")
+      .set("spark.executor.cores","2")
+      .set("spark.executor.memory","16G")
     val sc = SparkContext.getOrCreate(conf)
     val ssc: SQLContext = new HiveContext(sc) // 同 spark-shell 中的 sqlContext
     import ssc.implicits._
