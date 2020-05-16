@@ -49,7 +49,11 @@ object TargetPortrait {
         |  duration_w int comment "商场访问总时长",
         |  duration_m int,
         |  duration_avg_w int comment "商场平均访问时长",
-        |  duration_avg_m int
+        |  duration_avg_m int,
+        |  act_weekday  double  comment "工作日平均活跃度",
+        |  act_weekend  double  comment "周末平均活跃度",
+        |  act_w  double,
+        |  act_m  double
         |)
         |COMMENT ' 目标客户画像 '
         |PARTITIONED BY (
@@ -92,18 +96,50 @@ object TargetPortrait {
          |) t
          |""".stripMargin)
 
-    val df = w.as("a").join(m.as("b"), w("userid") === m("userid"), "full")
-        .selectExpr(
-          "nvl(a.userid, b.userid) as userid",
-          "nvl(a.cnt_w, 0) as cnt_w",
-          "nvl(b.cnt_m, 0) as cnt_m",
-          "nvl(a.duration_w, 0) as duration_w",
-          "nvl(b.duration_m, 0) as duration_m",
-          "nvl(a.duration_avg_w, 0) as duration_avg_w",
-          "nvl(b.duration_avg_m, 0) as duration_avg_m",
-          s"'$start' as start_date",
-          s"'$end' as end_date"
-        )
+    val dura = w.as("a").join(m.as("b"), w("userid") === m("userid"), "full")
+      .selectExpr(
+        "nvl(a.userid, b.userid) as userid",
+        "nvl(a.cnt_w, 0) as cnt_w",
+        "nvl(b.cnt_m, 0) as cnt_m",
+        "nvl(a.duration_w, 0) as duration_w",
+        "nvl(b.duration_m, 0) as duration_m",
+        "nvl(a.duration_avg_w, 0) as duration_avg_w",
+        "nvl(b.duration_avg_m, 0) as duration_avg_m"
+      )
+    dura.registerTempTable("t_dura")
+
+    val act = ssc.sql(
+      s"""
+         |select a.userid as userid, act_weekday, act_weekend, act_w, act_m
+         |from
+         |(
+         |  select
+         |    userid,
+         |    sum(case part_dtype when 'weekday' then act_d else 0 end)/sum(case part_dtype when 'weekday' then 1 else 0 end) as act_weekday,
+         |    sum(case part_dtype when 'weekend' then act_d else 0 end)/sum(case part_dtype when 'weekend' then 1 else 0 end) as act_weekend
+         |  from  suyanli.mall_target_act_d
+         |  where part_date between '$start' and '$end'
+         |  group by userid
+         |) a
+         |join
+         |( select userid, act_w, act_m from suyanli.mall_target_act_d where part_date='$end' ) b
+         |on a.userid = b.userid
+         |""".stripMargin)
+    act.registerTempTable("t_act")
+
+
+    val df = ssc.sql(
+      s"""
+         |select
+         |  a.userid as userid, cnt_w, cnt_m, duration_w, duration_m, duration_avg_w, duration_avg_m,
+         |  act_weekday, act_weekend, act_w, act_m,
+         |  '$start' as start_date, '$end' as end_date
+         |from
+         |( select * from t_dura ) a
+         |left join
+         |( select * from t_act ) b
+         |on a.userid = b.userid
+         |""".stripMargin)
 
     df.write.mode("overwrite").format("parquet")
       .partitionBy("start_date", "end_date")
