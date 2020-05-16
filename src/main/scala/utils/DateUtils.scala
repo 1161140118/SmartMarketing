@@ -118,12 +118,20 @@ object DateUtils {
     new SimpleDateFormat(format).format(cal.getTime())
   }
 
+  def isWeekend(date_str: String, format:String = "yyyyMMdd")={
+    val cal:Calendar =Calendar.getInstance()
+    val date = new SimpleDateFormat(format).parse(date_str)
+    cal.setTime(date)
+    ( cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)
+  }
+
 
   def main(args: Array[String]): Unit = {
     println(dateDiff("20200101","20200107"))
     val start = "20200101"
     val end = "20200107"
     println(DateUtils.dateDiff(start,end)/2 + 1)
+    println(DateUtils.isWeekend("20200104"))
   }
 
 }
