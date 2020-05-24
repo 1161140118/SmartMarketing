@@ -56,6 +56,7 @@ object MallIntentionPortrait {
         |  visit_cnt  int   comment "线下商场访问次数",
         |  visit_avg  int  comment "线下商场访问平均时长/min",
         |  visit_incr double  comment "线下商场访问时长增长率",
+        |  act_incr   double  comment "线下活跃度/忠诚度增长率",
         |  shop_score double  comment "线上购物APP使用得分",
         |  shop_incr  double  comment "线上购物APP使用得分增长量",
         |  act_hour int comment "周活跃时段"
@@ -68,6 +69,10 @@ object MallIntentionPortrait {
         |)
         |stored as parquet
        """.stripMargin)
+
+    /**
+     *  online
+     */
 
     val online = ssc.sql(
       s"""
@@ -82,13 +87,18 @@ object MallIntentionPortrait {
          |left join
          |( select userid, part_type, avg(shop_score) as shop_score
          |  from suyanli.flow_app_portrait  where part_date between '$pre_start' and '$pre_end'
-         |  group by userid, part_type )b
+         |  group by userid, part_type ) b
          |on a.userid=b.userid and a.part_type=b.part_type
          |left join
          |( select * from suyanli.flow_app_act_w where start_date>='$pre_start' and end_date<='$end') f
          |on a.userid=f.userid and a.part_type=f.part_type
          |""".stripMargin)
 
+    online.where("part_type='vip' and act_hour>0").show()
+
+    /**
+     *  offline
+     */
 
     val visit_info = ssc.sql(
       s"""
@@ -124,7 +134,7 @@ object MallIntentionPortrait {
     val res = ssc.sql(
       s"""
          |select
-         |  f.userid as userid, visit_cnt, dur_avg, dur_incr, act_incr
+         |  f.userid as userid, visit_cnt, dur_avg, dur_incr, act_incr,
          |  shop_score, shop_incr, act_hour,
          |  f.part_type as part_type,
          |  '$start' as start_date,

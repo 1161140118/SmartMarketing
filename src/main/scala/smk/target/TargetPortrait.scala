@@ -115,14 +115,20 @@ object TargetPortrait {
          |(
          |  select
          |    userid,
-         |    sum(case part_dtype when 'weekday' then act_d else 0 end)/sum(case part_dtype when 'weekday' then 1 else 0 end) as act_weekday,
-         |    sum(case part_dtype when 'weekend' then act_d else 0 end)/sum(case part_dtype when 'weekend' then 1 else 0 end) as act_weekend
+         |    sum( if(part_dtype='weekday', act_d, 0) )/sum( if(part_dtype='weekday', 1, 0) ) as act_weekday,
+         |    sum( if(part_dtype='weekend', act_d, 0) )/sum( if(part_dtype='weekend', 1, 0) ) as act_weekend
          |  from  suyanli.mall_target_act_d
          |  where part_date between '$start' and '$end'
          |  group by userid
          |) a
          |join
-         |( select userid, act_w, act_m from suyanli.mall_target_act_d where part_date='$end' ) b
+         |(
+         |  select
+         |    userid, sum( if(part_date between '$start' and '$end', act_d, 0) ) as act_w, sum(act_d) as act_m
+         |  from suyanli.mall_target_act_d
+         |  where part_date like '$month%'
+         |  group by userid
+         |) b
          |on a.userid = b.userid
          |""".stripMargin)
     act.registerTempTable("t_act")
