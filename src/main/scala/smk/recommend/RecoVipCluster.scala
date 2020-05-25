@@ -39,6 +39,24 @@ object RecoVipCluster {
     ssc.sql("set hive.exec.dynamic.partition.mode=nonstrict")
 
     val hc = new HiveContext(sc)
+    // 高忠诚度核心用户聚类表
+    hc.sql(
+      """
+        |CREATE TABLE IF NOT  EXISTS suyanli.reco_vip_cluster (
+        | userid  string,
+        | cid     int comment "簇id",
+        | gender  string,
+        | age     int,
+        | loyalty double
+        |)
+        |COMMENT '高忠诚度核心用户聚类表'
+        |PARTITIONED BY (
+        |    `start_date` string COMMENT '数据开始日期分区 <partition field>',
+        |    `end_date` string COMMENT '数据结束日期分区 <partition field>'
+        |)
+        |stored as parquet
+       """.stripMargin)
+
     // 用户聚类及年龄直方图相似度
     hc.sql(
       """
@@ -77,8 +95,8 @@ object RecoVipCluster {
       """
         |CREATE TABLE IF NOT  EXISTS suyanli.reco_mall_his (
         | cid int comment "簇id",
-        | mall  int comment "商场",
-        | mcnt   double  comment "商场访问次数"
+        | mall  string comment "商场",
+        | mcnt  int  comment "商场访问次数"
         |
         |)
         |COMMENT '核心商场直方图'
@@ -95,7 +113,7 @@ object RecoVipCluster {
         | userid string comment "主叫号码",
         | opp_userid  string comment "被叫号码",
         | cid int comment "主叫簇id",
-        | scoial_inti double  comment "亲密度"
+        | social_inti double  comment "亲密度"
         |)
         |COMMENT '核心商场直方图'
         |PARTITIONED BY (
@@ -120,7 +138,7 @@ object RecoVipCluster {
         |)
         |stored as parquet
        """.stripMargin)
-    //  线下活跃度描述
+    //  线下访问活跃度描述
     hc.sql(
       """
         |CREATE TABLE IF NOT  EXISTS suyanli.reco_act_des (
@@ -130,7 +148,7 @@ object RecoVipCluster {
         | act_weekend_avg  double,
         | act_weekend_std  double
         |)
-        |COMMENT '线下活跃度描述'
+        |COMMENT '线下访问活跃度描述'
         |PARTITIONED BY (
         |    `start_date` string COMMENT '数据开始日期分区 <partition field>',
         |    `end_date` string COMMENT '数据结束日期分区 <partition field>'
@@ -182,6 +200,9 @@ object RecoVipCluster {
     // 得到参与计算的、高忠诚度簇
     val cluster = cluster_init.join(cluster_cnt, Seq("cid")).where("loy_rank<loy_lim").select("userid","cid","gender","age","loyalty","pg","pg_rank")
     cluster.registerTempTable("t_cluster")
+
+    cluster.selectExpr("userid","cid","gender","age","loyalty",s"'$start' as start_date",s"'$end' as end_date").write.mode("overwrite").format("parquet").partitionBy("start_date", "end_date").insertInto("suyanli.reco_vip_cluster")
+
 
     /**
      *  直方图平滑处理:
