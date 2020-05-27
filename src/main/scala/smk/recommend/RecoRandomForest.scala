@@ -69,7 +69,7 @@ object RecoRandomForest {
       .setFeaturesCol("feature")
       .setLabelCol("category")
       .setPredictionCol("predict")
-      .setMaxDepth(12)
+      .setMaxDepth(11)
       .setNumTrees(60)
 
     val model = new Pipeline().setStages(Array(indexer,rf)).fit(train_vec)

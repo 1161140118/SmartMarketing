@@ -11,7 +11,6 @@ import utils.DateUtils
 
 object RecoItemGenerator {
 
-
   def main(args: Array[String]): Unit = {
     val param = args(0).split(" ")
     // args0
