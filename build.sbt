@@ -20,6 +20,13 @@ externalResolvers:= Resolver.withDefaultResolvers(resolvers.value,mavenCentral =
 // withLatestSnapshots:  这样 SBT 就直接使用从远程仓库拉取到的第一个 SNAPSHOT 依赖(版本号最新，时间未必最新）
 //updateOptions := updateOptions.value.withCachedResolution(true).withLatestSnapshots(false)
 
+// 在编译时排除某些类
+mappings in (Compile, packageBin) := { (mappings in (Compile, packageBin)).value.filter {
+  case (file, toPath) =>
+    !toPath.startsWith( "src/main/scala/smk/recommend/" )
+  }
+}
+
 
 lazy val sparkVersion = "1.5.1"
 

@@ -42,7 +42,6 @@ object FlowAppPortrait {
 
     val t1 = System.currentTimeMillis()
 
-
     val hc = new HiveContext(sc)
     hc.sql(
       """
