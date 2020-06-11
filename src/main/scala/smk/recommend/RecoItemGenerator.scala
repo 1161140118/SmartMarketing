@@ -38,7 +38,7 @@ object RecoItemGenerator {
     // 用户聚类及年龄直方图相似度
     hc.sql(
       """
-        |CREATE TABLE IF NOT  EXISTS suyanli.reco_sim_output (
+        |CREATE TABLE IF NOT  EXISTS suyanli.reco_items (
         | userid  string,
         | probability double  comment "预测概率" ,
         | predict double  comment "预测结果",
@@ -84,7 +84,7 @@ object RecoItemGenerator {
     tdata_pre.withColumn("start_date", lit(start)).withColumn("end_date", lit(end))
       .write.mode("overwrite").format("parquet")
       .partitionBy("start_date", "end_date")
-      .insertInto("suyanli.reco_sim_output")
+      .insertInto("suyanli.reco_items")
 
     sc.stop()
     println(s"Complete with ${(System.currentTimeMillis() - t1) / 60000} min.")

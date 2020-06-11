@@ -21,9 +21,9 @@ object RecoRandomForest {
     val end = if (param.length < 2) DateUtils.dateAddAndFormat(start, 6) else param(1) // '-' : 6 days later, or a specific date
     val month = start.substring(0, 6)
 
-    //    val start = "20200115"
-    //    val end = "20200121"
-    //    val month = "202001"
+//        val start = "20200115"
+//        val end = "20200121"
+//        val month = "202001"
 
     println(s"get args: $start, $end . more: $month ")
     val t1 = System.currentTimeMillis()
@@ -42,9 +42,18 @@ object RecoRandomForest {
     // 考虑到vip中约50%数据有social_sim，取同样比例target数据
     val target_lim = 2 * ssc.sql(s"select userid from suyanli.reco_sim_input where social_sim>0 and part_type='target' and start_date='$start' and end_date='$end'").count()
 
+    // vip数据过采样
+    val vip_count = ssc.sql(s" select *, 1.0 as label from suyanli.reco_sim_input where part_type='vip' and start_date='$start' and end_date='$end' ").count()
+    val times = (target_lim/vip_count).toInt
+    val vip_ori = ssc.sql(s" select *, 1.0 as label from suyanli.reco_sim_input where part_type='vip' and start_date='$start' and end_date='$end' ")
+    var vip_input = vip_ori
+    for( i <- (2 to times) ){
+      vip_input = vip_input.unionAll(vip_ori)
+    }
+
     //  选取输入数据
-    val data = ssc.sql(s" select *, 1.0 as label from suyanli.reco_sim_input where part_type='vip' and start_date='$start' and end_date='$end' ").unionAll(
-      ssc.sql(s" select *, 0.0 as label from suyanli.reco_sim_input where part_type='target' and start_date='$start' and end_date='$end' order by social_sim desc limit $target_lim ").sample(false,0.1)
+    val data = vip_input.unionAll(
+      ssc.sql(s" select *, 0.0 as label from suyanli.reco_sim_input where part_type='target' and start_date='$start' and end_date='$end' order by social_sim desc limit $target_lim ")
     ).drop("part_type").drop("start_date").drop("end_date")
     //    data.where("social_sim>0").groupBy("part_type").count()
 
@@ -69,8 +78,13 @@ object RecoRandomForest {
       .setFeaturesCol("feature")
       .setLabelCol("category")
       .setPredictionCol("predict")
-      .setMaxDepth(11)
-      .setNumTrees(60)
+      .setMaxDepth(14)
+      .setNumTrees(40)
+
+    // 随机森林 特征重要性
+//    val indexer_fitted = indexer.fit(train_vec)
+//    val rfmodel = rf.fit( indexer_fitted.transform(train_vec) )
+//    rfmodel.featureImportances
 
     val model = new Pipeline().setStages(Array(indexer,rf)).fit(train_vec)
     val pre = model.transform(test_vec)
@@ -81,17 +95,26 @@ object RecoRandomForest {
       case Row(predict:Double,label:Double)=>(predict,label)
     }
     val metrics = new MulticlassMetrics(predictionRdd)
-    val precision = metrics.precision
-    val recall = metrics.recall
-    val weightedPrecision = metrics.weightedPrecision
-    val weightedRecall= metrics.weightedRecall
-    val f1 = metrics.weightedFMeasure
+    val pre_res = metrics.confusionMatrix.toArray
+    val precision = pre_res(3)/(pre_res(2)+pre_res(3))
+    val recall = pre_res(3)/(pre_res(1)+pre_res(3))
+    val f1 = 2*precision*recall/(precision+recall)
     println(s"RF评估结果：\n " +
-      s"分类准确率：${precision}\n " +
-      s"分类召回率：${recall}\n " +
-      s"加权正确率：${weightedPrecision}\n " +
-      s"加权召回率：${weightedRecall}\n " +
-      s"F1值：${f1}")
+            s"分类精确率：${precision}\n " +
+            s"分类召回率：${recall}\n " +
+            s"F1值：${f1}")
+
+    //    val precision = metrics.precision
+    //    val recall = metrics.recall
+    //    val weightedPrecision = metrics.weightedPrecision
+    //    val weightedRecall= metrics.weightedRecall
+    //    val f1 = metrics.weightedFMeasure
+//    println(s"RF评估结果：\n " +
+//      s"分类准确率：${precision}\n " +
+//      s"分类召回率：${recall}\n " +
+//      s"加权正确率：${weightedPrecision}\n " +
+//      s"加权召回率：${weightedRecall}\n " +
+//      s"F1值：${f1}")
 
     // 保存模型
     sc.parallelize(Seq(model), 1).saveAsObjectFile(MODEL_PATH)
