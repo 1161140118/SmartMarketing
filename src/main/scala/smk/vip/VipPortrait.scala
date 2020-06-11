@@ -109,7 +109,7 @@ object VipPortrait {
 
     w_score_cur.registerTempTable("t_week_cur")
 
-    // 计算累计忠诚度
+    // 计算累计忠诚度 和 周访问记录
     val w_score = ssc.sql(
       s"""
          |select
@@ -127,6 +127,7 @@ object VipPortrait {
          |  on a.userid = b.userid
          |""".stripMargin).filter($"loyalty" > 0.3 ) // 筛除连续四周未出现的用户
 
+    // 计算月访问记录
     val m = ssc.sql(
       s"""
          |select

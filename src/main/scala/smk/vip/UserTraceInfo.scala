@@ -4,6 +4,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 
+/**
+ * 匹配用户和基站，过滤得到轨迹记录
+ */
 object UserTraceInfo {
 
   def main(args: Array[String]): Unit = {

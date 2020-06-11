@@ -4,6 +4,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 
+/**
+ *  根据连接记录级和日级统计信息，过滤合法记录
+ */
 object UserTraceStat {
 
   def main(args: Array[String]): Unit = {
