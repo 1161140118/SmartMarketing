@@ -1,0 +1,55 @@
+class GsmCircle ( 
+    stat_mon:String,
+    serv_no:String,
+    opp_serv_no:String,
+    opp_type:String,
+    opp_region_code:String,
+    call_dur:Long,
+    calling_dur:Long,
+    called_dur:Long,
+    call_cnt:Long,
+    calling_cnt:Long,
+    called_cnt:Long,
+    busy_call_cnt:Long,
+    idle_call_cnt:Long,
+    busy_dur:Long,
+    idle_dur:Long,
+    weekday_sum_call_cnt:Long,
+    weekday_work_sum_call_cnt:Long,
+    weekday_offwork_sum_call_cnt:Long,
+    weekend_sum_call_cnt:Long,
+    weekday_sum_call_dur:Long,
+    weekend_sum_call_dur:Long,
+    call_days:Long,
+    first_call_date:String,
+    last_call_date:String
+) extends Product() with Serializable{
+    def productElement(n: Int) = n match {
+        case 0 => stat_mon 
+        case 1 => serv_no 
+        case 2 => opp_serv_no 
+        case 3 => opp_type 
+        case 4 => opp_region_code 
+        case 5 => call_dur 
+        case 6 => calling_dur 
+        case 7 => called_dur 
+        case 8 => call_cnt 
+        case 9 => calling_cnt 
+        case 10 => called_cnt 
+        case 11 => busy_call_cnt 
+        case 12 => idle_call_cnt 
+        case 13 => busy_dur 
+        case 14 => idle_dur 
+        case 15 => weekday_sum_call_cnt 
+        case 16 => weekday_work_sum_call_cnt 
+        case 17 => weekday_offwork_sum_call_cnt 
+        case 18 => weekend_sum_call_cnt 
+        case 19 => weekday_sum_call_dur 
+        case 20 => weekend_sum_call_dur 
+        case 21 => call_days 
+        case 22 => first_call_date 
+        case 23 => last_call_date 
+    }
+    def canEqual(that: Any) = that.isInstanceOf[GsmCircle]
+    def productArity = 24
+}

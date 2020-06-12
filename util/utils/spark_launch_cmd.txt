@@ -1,0 +1,7 @@
+spark-submit \
+--class com.huawei.bigdata.SceneReminder.stream.DataBalanceStreamJob \
+--queue xxxxxxxx \
+--conf spark.streaming.kafka.maxRatePerPartition=10000 \
+--jars /opt/hadoop_client/Spark/spark/lib/gson-2.2.4.jar,/opt/hadoop_client/Spark/spark/lib/ojdbc6-11.2.0.3.0.jar,/opt/hadoop_client/Spark/spark/lib/jredisclient-0.0.1.jar,/opt/hadoop_client/Spark/spark/lib/commons-pool2-2.3.jar,/opt/hadoop_client/Spark/spark/lib/streamingClient/spark-streaming-kafka_2.10-1.5.1.jar,/opt/hadoop_client/Spark/spark/lib/streamingClient/kafka_2.10-0.8.2.1.jar,/opt/hadoop_client/Spark/spark/lib/streamingClient/kafka-clients-0.8.2.1.jar \
+--master yarn /data1/hlj_spark/hlj3_dataBal.jar \
+--deploy-mode cluster > /data1/hlj_spark/dabl.log 2>&1
