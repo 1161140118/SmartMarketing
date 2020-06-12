@@ -6,6 +6,9 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.graphx._
 import org.apache.spark.sql.functions.lit
 
+/**
+ *  计算PageRank和入度与出度
+ */
 object SocialPageRankM {
 
   def main(args: Array[String]): Unit = {
@@ -50,15 +53,19 @@ object SocialPageRankM {
          |where part_month='$month' and calling_dur >0 and calling_cnt>0
          |""".stripMargin)
 
+    // 获得所有顶点
     val vertexDf = circle.select("userid").unionAll(circle.selectExpr("opp_userid as userid")).distinct()
 
+    // 构建顶点rdd、边rdd、社交关系图
     val vertices = vertexDf.rdd.map( row => (row.getLong(0),1) )
     val edges = circle.rdd.map( row => Edge(row.getLong(0), row.getLong(1), 1) )
     val graph = Graph(vertices,edges)
 
+    // 计算入度、出度
     graph.inDegrees.toDF("userid","in_degree").registerTempTable("t_in_degree")
     graph.outDegrees.toDF("userid","out_degree").registerTempTable("t_out_degree")
 
+    // 计算 pagerank
     val rank = graph.staticPageRank(iter)
     rank.vertices.toDF("userid", "score").registerTempTable("t_pagerank")
 

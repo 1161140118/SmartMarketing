@@ -61,15 +61,17 @@ object SocialGsmCircleInfoM {
         |stored as parquet
        """.stripMargin)
 
+    // 筛选"有效"客户id
     val valid = ssc.sql(
       s"""
          |select userid as valid_userid from suyanli.social_gsm_stat_m
          |where part_month = '$month' and part_valid = 'true'
          |""".stripMargin)
 
+    // udf: 计算两日期的时间差
     val my_date_diff = (pre: String, post:String) => pre.substring(6,8).toInt - post.substring(6,8).toInt + 1
     ssc.udf.register("my_date_diff", my_date_diff)
-
+    // 计算统计数据
     val circle = ssc.sql(
       s"""
          |select

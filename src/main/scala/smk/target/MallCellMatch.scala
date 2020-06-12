@@ -83,6 +83,7 @@ object MallCellMatch {
 
     scope.registerTempTable("t_scope_match")
 
+    // 补充枫叶小镇基站记录
     val mall = "枫叶小镇奥特莱斯"
     val outlets = ssc.sql(
       s"""

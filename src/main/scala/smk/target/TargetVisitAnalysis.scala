@@ -53,6 +53,7 @@ object TargetVisitAnalysis {
          |stored as parquet
        """.stripMargin)
 
+    // 读取历史黑名单，作为疑似员工/居民记录的过滤名单
     val blacklist = ssc.sql(
       s"""
          |select
@@ -72,6 +73,7 @@ object TargetVisitAnalysis {
 
     /**
      *  mall_target_visit_daily
+     *  日级汇总表
      */
 
     val dd = ssc.sql(
@@ -106,9 +108,10 @@ object TargetVisitAnalysis {
 
     /**
      *  mall_target_visit_weekly
+     *  周级汇总表
      */
 
-
+    // udf： 商场list，转为map(商场,访问次数)
     val mall_counter = (lists: Seq[String])  => {
       import scala.collection.mutable
       val list = lists.flatMap( _.split(',').map(_.drop(1).dropRight(1)) )

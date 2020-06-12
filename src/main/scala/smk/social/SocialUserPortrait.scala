@@ -4,6 +4,11 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 
+/**
+ *  用户社交关系单方画像：
+ *    1.  pagerank 评分、排名
+ *    2.  通话记录统计
+ */
 object SocialUserPortrait {
 
   def main(args: Array[String]): Unit = {

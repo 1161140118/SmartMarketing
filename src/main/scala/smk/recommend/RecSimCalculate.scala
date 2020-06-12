@@ -6,6 +6,9 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.functions._
 import utils.DateUtils
 
+/**
+ *  目标客户特征/相似度属性 构建
+ */
 object RecSimCalculate {
 
   def main(args: Array[String]): Unit = {
@@ -61,6 +64,7 @@ object RecSimCalculate {
      *  vip
      */
 
+    // 核心客户基本信息和部分属性
     val vip_info = ssc.sql(
       s"""
          |select
@@ -74,6 +78,7 @@ object RecSimCalculate {
          |""".stripMargin)
     vip_info.registerTempTable("t_vip_info")
 
+    // 核心客户簇相似度属性计算
     val vip_score_sim = ssc.sql(
       s"""
          |select
@@ -101,6 +106,7 @@ object RecSimCalculate {
     // vip_info.agg(countDistinct("userid"),count("userid")).show()
     // vip_info.groupBy("userid").agg(count("userid").as("cnt")).where("cnt>1").show()
 
+    // 核心客户 核心商场相似度计算
     val vip_mall_match = ssc.sql(
       s"""
          |select
@@ -124,6 +130,7 @@ object RecSimCalculate {
 //    vip_mall_sim_des.show()
     vip_mall_sim.registerTempTable("t_vip_mall_sim")
 
+    // 核心客户 社交相似度计算
     val vip_social_sim = ssc.sql(
       s"""
          |select

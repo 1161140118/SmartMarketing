@@ -60,6 +60,7 @@ object SocialGsmStatM {
        """.stripMargin)
 
 
+    // 计算多种统计属性
     val df_group = ssc.sql(
       s"""
          |select 
@@ -104,8 +105,8 @@ object SocialGsmStatM {
          |) tt
          |""".stripMargin)
 
+    // 利用 describe 方法获得均值和标准差（spark 1.5.1 不支持标准差函数）
     val df_des = df_group.describe("calling_avg_ln","called_avg_ln","calling_univ_ln","calling_cnt_ln","called_cnt_ln", "one_min_calling_cnt_ln", "loc_cnt_ln")
-
     val mean = df_des.where("summary = 'mean' ").collect()(0)
     val stddev = df_des.where("summary = 'stddev' ").collect()(0)
 

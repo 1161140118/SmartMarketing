@@ -5,6 +5,9 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.functions._
 
+/**
+ *  社交关系双方画像
+ */
 object SocialMutualPortrait {
 
   def main(args: Array[String]): Unit = {

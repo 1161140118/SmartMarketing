@@ -5,6 +5,9 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.functions._
 
+/**
+ *  计算社交亲密度
+ */
 object SocialDistanceM {
 
   def main(args: Array[String]): Unit = {
@@ -47,20 +50,20 @@ object SocialDistanceM {
     val dis = ssc.sql(
       s"""
          |select
-         |  * , row_number() over (partition by userid order by call_score desc) as score_r
+         |  * , row_number() over (partition by userid order by call_score desc) as score_r   -- score 排名
          |from
          |(
          |  select
          |    * ,
-         |    3/( 1/called_avg_r + 1/called_cnt_r + 1/called_days_r  ) as called_dis,
-         |    2 / ( calling_dis +  3/(1/called_avg_r + 1/called_cnt_r + 1/called_days_r) ) as call_score
+         |    3/( 1/called_avg_r + 1/called_cnt_r + 1/called_days_r  ) as called_dis, -- 三种rank 调和平均获得B侧单方dis
+         |    2 / ( calling_dis +  3/(1/called_avg_r + 1/called_cnt_r + 1/called_days_r) ) as call_score  -- 综合两侧dis，计算得到score
          |  from
          |  (
          |    select * ,
          |      rank() over (partition by opp_userid order by called_dur*( 1- busy_dur*60/(calling_dur+called_dur) )/called_cnt desc ) as called_avg_r,
          |      rank() over (partition by opp_userid order by called_cnt*( 1- busy_cnt/(calling_cnt+called_cnt) ) desc ) as called_cnt_r,
          |      rank() over (partition by opp_userid order by call_days desc, call_days_span asc) as called_days_r,
-         |      3/( 1/calling_avg_r + 1/calling_cnt_r + 1/calling_days_r  ) as calling_dis
+         |      3/( 1/calling_avg_r + 1/calling_cnt_r + 1/calling_days_r  ) as calling_dis  -- 三种rank 调和平均获得A侧单方dis
          |    from
          |      (
          |        select * ,
@@ -69,9 +72,9 @@ object SocialDistanceM {
          |          rank() over (partition by userid order by call_days desc, call_days_span asc) as calling_days_r
          |        from suyanli.social_gsm_circle_info_m
          |        where part_month='$month'
-         |      ) t
-         |  ) tt
-         |) ttt
+         |      ) t -- A 侧排名
+         |  ) tt  -- B 侧排名
+         |) ttt -- 根据A、B两侧排名 亲密度距离计算
          |""".stripMargin)
 
     dis.select("userid", "opp_userid", "score_r", "call_score", "calling_avg_r", "calling_cnt_r", "calling_days_r", "called_avg_r", "called_cnt_r", "called_days_r")

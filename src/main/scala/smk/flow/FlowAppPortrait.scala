@@ -63,6 +63,7 @@ object FlowAppPortrait {
         |stored as parquet
        """.stripMargin)
 
+    // 统计这些app的使用情况
     val shop_appids = List("C874", "C1655", "C65307", "C1006", "C632", "C923", "W142", "C66988")
     val pay_appids = List("C1167", "C65816", "C4518")
     val fin_appids = List("C66739", "C222343","C968")
@@ -83,6 +84,7 @@ object FlowAppPortrait {
 //        .sum( shop_appids:_* )
 //        .selectExpr( List("userid","part_type","part_date") ::: shop_appids.map(appid => s" `sum($appid)` as $appid " ):_*)
 
+    // 定义udf 计算标准差
     def myVar(col: Column): Column = {  sqrt(avg(col * col) - avg(col) * avg(col)) }
     val stat = flow.groupBy("appid","appname").agg( avg("flow_ln").as("flow_avg"), myVar($"flow_ln").as("flow_var") ).cache()
     stat.registerTempTable("t_stat")

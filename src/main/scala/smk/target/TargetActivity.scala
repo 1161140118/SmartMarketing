@@ -56,6 +56,7 @@ object TargetActivity {
         |stored as parquet
        """.stripMargin)
 
+    // 获得目标用户id表
     val t = ssc.sql(
       s"""
          |select distinct userid
@@ -64,6 +65,7 @@ object TargetActivity {
          |   or ( start_date <= '$date' and end_date >= '$date' )
          |""".stripMargin)
 
+    // 计算日活跃度
     val act = ssc.sql(
       s"""
          |select userid, count(*) as act_d, part_date
@@ -80,6 +82,7 @@ object TargetActivity {
 //         |group by userid, part_date
 //         |""".stripMargin).join(t,Seq("userid"))
 
+    // 计算周、月活跃度
     val today = act.where(s" part_date='$date'")
     val week = act.where(s" part_date between '$pre_date' and '$date' ").groupBy("userid").agg( avg("act_d").as("act_w") )
     val monthly = act.where(s" part_date <= '$date' ").groupBy("userid").agg( avg("act_d").as("act_m") )

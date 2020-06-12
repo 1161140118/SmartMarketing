@@ -24,15 +24,17 @@ object MallIntentionPortrait {
 
 
   def main(args: Array[String]): Unit = {
-    val param = args(0).split(" ")
+    val param = args(0).split(" ")  // 获得一个字符串参数，至多包含四个指定日期
 
-    // args0
+    // args0，参数1，本周期开始时间
     val start = param(0)
-    // args1
+    // args1，参数2，本周起结束时间，若未指定，则默认为start+6
     val end = if ( param.length < 2 ) DateUtils.dateAddAndFormat(start,6) else param(1) // '-' : 6 days later, or a specific date
-
+    // 截取月份
     val month = start.substring(0,6)
+    // 参数3，上周期开始时间，若未指定，则默认为start-7
     val pre_start = if(param.length < 3 ) DateUtils.dateAddAndFormat(start, -7) else param(2)
+    // 参数4，上周期结束时间，若未指定，则默认为pre_start+6
     val pre_end = if(param.length < 4 ) DateUtils.dateAddAndFormat(pre_start, 6) else param(3)
 
     println(s"get args: $start, $end . more: $month, $pre_start, $pre_end ")
@@ -72,6 +74,7 @@ object MallIntentionPortrait {
 
     /**
      *  online
+     *  线上画像属性
      */
 
     val online = ssc.sql(
@@ -94,12 +97,14 @@ object MallIntentionPortrait {
          |on a.userid=f.userid and a.part_type=f.part_type
          |""".stripMargin)
 
-    online.where("part_type='vip' and act_hour>0").show()
+//    online.where("part_type='vip' and act_hour>0").show()
 
     /**
      *  offline
+     *  线下画像属性
      */
 
+    // 获得线下访问记录信息
     val visit_info = ssc.sql(
       s"""
          |select userid, cnt_w as cnt, dur_avg_w as dur_avg, duration_w as duration, act_w as act, part_type, start_date, end_date
@@ -114,6 +119,7 @@ object MallIntentionPortrait {
          |""".stripMargin)
     visit_info.registerTempTable("t_visit")
 
+    // 对比本周期与上周期记录
     val offline = ssc.sql(
       s"""
          |select
@@ -131,6 +137,7 @@ object MallIntentionPortrait {
     online.registerTempTable("t_online")
     offline.registerTempTable("t_offline")
 
+    // 合并线上、线下属性
     val res = ssc.sql(
       s"""
          |select

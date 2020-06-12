@@ -5,6 +5,9 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.functions._
 
+/**
+ *  目标客户流量数据，时段表/日表
+ */
 object FlowAppStatD {
 
 
