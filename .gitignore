@@ -1,4 +1,6 @@
 .idea/*
-project/*
+project/project/*
+project/target/*
 target/*
+paper/*
 src/main/scala/utils/papyrus.scala
