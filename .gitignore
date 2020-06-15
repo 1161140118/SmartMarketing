@@ -4,3 +4,6 @@ project/target/*
 target/*
 paper/*
 src/main/scala/utils/papyrus.scala
+util/metadata/*
+util/raw_data/*
+

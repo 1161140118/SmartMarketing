@@ -261,8 +261,8 @@ APP 使用情况分析
 
 辅助程序目录：`util`。
 
-* metadata 元数据目录，用于数据字段参考
-* raw_data 部分原始数据
+* *metadata* 元数据目录，用于数据字段参考
+* *raw_data* 部分原始数据
 * data  raw_date处理得到的数据，用于输入hive或spark运算
 * utils  一些辅助代码
 * markdowns
